@@ -57,7 +57,7 @@ var Web = cli.Command{
 and it takes care of all the other things for you`,
 	Action: runWeb,
 	Flags: []cli.Flag{
-		stringFlag("port, p", "3000", "Temporary port number to prevent conflict"),
+		stringFlag("port, p", "3002", "Temporary port number to prevent conflict"),
 		stringFlag("config, c", "", "Custom configuration file path"),
 	},
 }
@@ -708,6 +708,7 @@ func runWeb(c *cli.Context) error {
 		log.Info("Listen on %v://%s", conf.Server.Protocol, listenAddr)
 	} else {
 		listenAddr = fmt.Sprintf("%s:%s", conf.Server.HTTPAddr, conf.Server.HTTPPort)
+		//listenAddr = fmt.Sprintf("%s:%s", "192.168.0.102", "3002")
 		log.Info("Listen on %v://%s%s", conf.Server.Protocol, listenAddr, conf.Server.Subpath)
 	}
 

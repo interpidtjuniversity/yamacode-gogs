@@ -39,6 +39,6 @@ RUN ./docker/finalize.sh
 
 # Configure Docker Container
 VOLUME ["/data", "/backup"]
-EXPOSE 22 3000
+EXPOSE 22 3002
 ENTRYPOINT ["/app/gogs/docker/start.sh"]
 CMD ["/bin/s6-svscan", "/app/gogs/docker/s6/"]

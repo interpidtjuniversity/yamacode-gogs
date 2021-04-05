@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"gogs.io/gogs/internal/errutil"
+	"xorm.io/builder"
 )
 
 type MergeRequest struct {
@@ -28,6 +29,15 @@ func GetMergeRequestById(index int64) (*MergeRequest, error) {
 	has, _ := x.ID(index).Get(mr)
 	if !has{
 		return nil, ErrMRNotExist{Args: errutil.Args{"MRId": index}}
+	}
+	return mr, nil
+}
+
+func GetMergeRequestByRepoIdAndCommitId(repoId int64, sourceCommit, targetCommit string) (*MergeRequest, error) {
+	mr := &MergeRequest{}
+	has, err := x.Where(builder.Eq{"repo_id":repoId}.And(builder.Like{"source_commit", sourceCommit}).And(builder.Like{"target_commit", targetCommit})).Get(mr)
+	if !has {
+		return nil, err
 	}
 	return mr, nil
 }
