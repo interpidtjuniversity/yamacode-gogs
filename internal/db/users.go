@@ -43,6 +43,8 @@ type UsersStore interface {
 	GetByID(id int64) (*User, error)
 	// GetByUsername returns the user with given username. It returns ErrUserNotExist when not found.
 	GetByUsername(username string) (*User, error)
+	// GetAllUser
+	GetAllUser() ([]string, error)
 }
 
 var Users UsersStore
@@ -292,4 +294,19 @@ func (db *users) GetByUsername(username string) (*User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (db *users) GetAllUser() ([]string, error) {
+	var userNames []string
+	rows, err := db.Table("user").Select("name").Where("id > ?", 0).Rows()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var name string
+		rows.Scan(&name)
+		userNames = append(userNames, name)
+	}
+	return userNames, nil
 }

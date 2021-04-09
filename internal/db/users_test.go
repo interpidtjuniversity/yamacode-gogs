@@ -5,6 +5,7 @@
 package db
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -35,6 +36,7 @@ func Test_users(t *testing.T) {
 		{"GetByEmail", test_users_GetByEmail},
 		{"GetByID", test_users_GetByID},
 		{"GetByUsername", test_users_GetByUsername},
+		{"GetAllUser", test_users_GetAllUser},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Cleanup(func() {
@@ -259,4 +261,28 @@ func test_users_GetByUsername(t *testing.T, db *users) {
 	_, err = db.GetByUsername("bad_username")
 	expErr := ErrUserNotExist{Args: errutil.Args{"name": "bad_username"}}
 	assert.Equal(t, expErr, err)
+}
+
+func test_users_GetAllUser(t *testing.T, db *users) {
+	alice, err := db.Create(CreateUserOpts{
+		Name:  "alice",
+		Email: "alice@exmaple.com",
+	})
+	if err!=nil{
+		t.Fatal(err)
+	}
+	fmt.Print(alice)
+
+	db.Create(CreateUserOpts{
+		Name:  "bob",
+		Email: "bob@exmaple.com",
+	})
+
+	db.Create(CreateUserOpts{
+		Name:  "cy",
+		Email: "cy@exmaple.com",
+	})
+
+	ans, _ := db.GetAllUser()
+	assert.Equal(t, 3, len(ans))
 }

@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: branch.proto
 
-package service
+package serviceImpl
 
 import (
 	context "context"

@@ -163,6 +163,11 @@ var _ ReposStore = (*MockReposStore)(nil)
 
 type MockReposStore struct {
 	MockGetByName func(ownerID int64, name string) (*Repository, error)
+	MockGetByOwner func(ownerID int64) ([]string, error)
+}
+
+func (m *MockReposStore) GetByOwner(ownerID int64) ([]string, error) {
+	return m.MockGetByOwner(ownerID)
 }
 
 func (m *MockReposStore) GetByName(ownerID int64, name string) (*Repository, error) {
@@ -213,6 +218,7 @@ type MockUsersStore struct {
 	MockGetByEmail    func(email string) (*User, error)
 	MockGetByID       func(id int64) (*User, error)
 	MockGetByUsername func(username string) (*User, error)
+	MockGetAllUser    func() ([]string, error)
 }
 
 func (m *MockUsersStore) Authenticate(username, password string, loginSourceID int64) (*User, error) {
@@ -233,6 +239,10 @@ func (m *MockUsersStore) GetByID(id int64) (*User, error) {
 
 func (m *MockUsersStore) GetByUsername(username string) (*User, error) {
 	return m.MockGetByUsername(username)
+}
+
+func (m *MockUsersStore) GetAllUser() ([]string, error){
+	return m.MockGetAllUser()
 }
 
 func SetMockUsersStore(t *testing.T, mock UsersStore) {

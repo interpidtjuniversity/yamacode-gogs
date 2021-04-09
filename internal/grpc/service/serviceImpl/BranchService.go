@@ -8,32 +8,28 @@ import (
 	"gogs.io/gogs/internal/db"
 	"gogs.io/gogs/internal/errutil"
 	"gogs.io/gogs/internal/gitutil"
-	"gogs.io/gogs/internal/grpc/service"
-	"google.golang.org/grpc"
-	"log"
-	"net"
 )
 
 type BranchService struct {}
 
-func (b *BranchService) CreateBranch(ctx context.Context, request *service.CreateBranchRequest) (*service.CreateBranchResponse, error) {
+func (b *BranchService) CreateBranch(ctx context.Context, request *CreateBranchRequest) (*CreateBranchResponse, error) {
 	return nil,nil
 }
 
-func (b *BranchService) DeleteBranch(ctx context.Context, request *service.DeleteBranchRequest) (*service.DeleteBranchResponse, error) {
+func (b *BranchService) DeleteBranch(ctx context.Context, request *DeleteBranchRequest) (*DeleteBranchResponse, error) {
 	return nil,nil
 }
 
-func (b *BranchService) Merge2Branch(ctx context.Context, request *service.Merge2BranchRequest) (*service.Merge2BranchResponse, error) {
+func (b *BranchService) Merge2Branch(ctx context.Context, request *Merge2BranchRequest) (*Merge2BranchResponse, error) {
 	return nil,nil
 }
 
-func (b *BranchService) Query2BranchConflict(ctx context.Context, request *service.ConflictDetectRequest) (*service.ConflictDetectResponse, error) {
+func (b *BranchService) Query2BranchConflict(ctx context.Context, request *ConflictDetectRequest) (*ConflictDetectResponse, error) {
 	return nil, nil
 }
 
-func (b *BranchService) QueryRepoBranchCommit(ctx context.Context, request *service.CommitQueryRequest) (*service.CommitQueryResponse, error) {
-	baseResponse := &service.CommitQueryResponse{}
+func (b *BranchService) QueryRepoBranchCommit(ctx context.Context, request *CommitQueryRequest) (*CommitQueryResponse, error) {
+	baseResponse := &CommitQueryResponse{}
 	ownerName := request.OwnerName
 	repoName := request.RepoName
 	owner, err := db.GetUserByName(ownerName)
@@ -70,8 +66,8 @@ func (b *BranchService) QueryRepoBranchCommit(ctx context.Context, request *serv
 	return baseResponse, nil
 }
 
-func (b *BranchService) RegisterMergeRequest(ctx context.Context, request *service.RegisterMRRequest) (*service.RegisterMRResponse, error) {
-	baseResponse := &service.RegisterMRResponse{}
+func (b *BranchService) RegisterMergeRequest(ctx context.Context, request *RegisterMRRequest) (*RegisterMRResponse, error) {
+	baseResponse := &RegisterMRResponse{}
 
 	ownerName := request.OwnerName
 	repoName := request.RepoName
@@ -114,22 +110,5 @@ func (b *BranchService) RegisterMergeRequest(ctx context.Context, request *servi
 	baseResponse.ShowDiffUri = fmt.Sprintf("%v://%s%s/%s/%s/mr/%d/files", conf.Server.Protocol, listenAddr, conf.Server.Subpath, ownerName, repoName, id)
 	//baseResponse.ShowDiffUri = fmt.Sprintf("%v://%s%s/%s/%s/mr/%d/files", conf.Server.Protocol, "localhost:3002", conf.Server.Subpath, ownerName, repoName, id)
 	return baseResponse, nil
-}
-
-func StartBranchService() {
-	lis, err := net.Listen("tcp", ":8000")
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-
-	//建立 gPRC 服务器，并注册服务
-	s := grpc.NewServer()
-	service.RegisterYaMaHubBranchServiceServer(s, &BranchService{})
-
-	log.Println("Server run ...")
-	//启动服务
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("fail to serve: %v", err)
-	}
 }
 

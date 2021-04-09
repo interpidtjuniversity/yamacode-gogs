@@ -21,6 +21,8 @@ type ReposStore interface {
 	// GetByName returns the repository with given owner and name.
 	// It returns ErrRepoNotExist when not found.
 	GetByName(ownerID int64, name string) (*Repository, error)
+
+	GetByOwner(ownerID int64) ([]string, error)
 }
 
 var Repos ReposStore
@@ -135,6 +137,22 @@ func (db *repos) GetByName(ownerID int64, name string) (*Repository, error) {
 		return nil, err
 	}
 	return repo, nil
+}
+
+func (db *repos) GetByOwner(ownerID int64) ([]string, error) {
+	var repoNames []string
+	rows, err := db.Table("repository").Select("name").Where("owner_id=?",ownerID).Rows()
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var name string
+		rows.Scan(&name)
+		repoNames = append(repoNames, name)
+	}
+	return repoNames, nil
 }
 
 type ErrDiffNotExist struct {

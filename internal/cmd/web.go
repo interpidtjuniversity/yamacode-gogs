@@ -7,7 +7,7 @@ package cmd
 import (
 	"crypto/tls"
 	"fmt"
-	"gogs.io/gogs/internal/grpc/service/serviceImpl"
+	"gogs.io/gogs/internal/grpc/service"
 	"io"
 	"net"
 	"net/http"
@@ -158,7 +158,7 @@ func newMacaron() *macaron.Macaron {
 }
 
 func runWeb(c *cli.Context) error {
-	go serviceImpl.StartBranchService()
+	go service.Start()
 	err := route.GlobalInit(c.String("config"))
 	if err != nil {
 		log.Fatal("Failed to initialize application: %v", err)
