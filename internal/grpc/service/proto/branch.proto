@@ -1,13 +1,14 @@
 syntax = "proto3";
 package proto;
-option go_package="../../service";
+option go_package="../../service/serviceImpl";
 
 message CreateBranchRequest{
   int64 userId = 1;
   string userName = 2;
   string repository = 3;
   string branch = 4;
-  bool isLock = 5;
+  bool protected = 5;
+  bool needMr = 6;
 }
 message CreateBranchResponse{
   bool success = 1;

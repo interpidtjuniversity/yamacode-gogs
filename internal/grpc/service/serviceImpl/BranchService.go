@@ -13,7 +13,43 @@ import (
 type BranchService struct {}
 
 func (b *BranchService) CreateBranch(ctx context.Context, request *CreateBranchRequest) (*CreateBranchResponse, error) {
-	return nil,nil
+	baseResponse := &CreateBranchResponse{}
+	ownerName := request.UserName
+	repoName := request.Repository
+	branch := request.Branch
+	protected := request.Protected
+	needMR := request.NeedMr
+	owner, err := db.GetUserByName(ownerName)
+	if err != nil {
+		return baseResponse, db.ErrUserNotExist{Args: errutil.Args{"userName": ownerName}}
+	}
+	repository, err := db.GetRepositoryByName(owner.ID, repoName)
+	if err != nil {
+		return baseResponse, db.ErrRepoNotExist{Args: errutil.Args{"userName": ownerName, "repoName": repoName}}
+	}
+	gitRepo, err := git.Open(db.RepoPath(ownerName, repoName))
+	if err != nil {
+		return baseResponse, db.ErrRepoNotExist{Args: errutil.Args{"ownerName": ownerName, "repoName": repoName}}
+	}
+	success, err := gitutil.NewRepoBranch(gitRepo.Path(), branch)
+	if err != nil {
+		return baseResponse, err
+	}
+	protectedBranch := db.ProtectBranch{
+		RepoID: repository.RepoID,
+		Name: branch,
+		Protected: protected,
+		RequirePullRequest: needMR,
+		EnableWhitelist: false,
+		WhitelistTeamIDs: "",
+		WhitelistUserIDs: "",
+	}
+	err = db.UpdateProtectBranch(&protectedBranch)
+	if err != nil  {
+		return baseResponse, err
+	}
+	baseResponse.Success = success
+	return baseResponse,nil
 }
 
 func (b *BranchService) DeleteBranch(ctx context.Context, request *DeleteBranchRequest) (*DeleteBranchResponse, error) {

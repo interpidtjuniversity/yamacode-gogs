@@ -1,6 +1,6 @@
 syntax = "proto3";
 package proto;
-option go_package="../../service";
+option go_package="../../service/serviceImpl";
 
 message QueryOwnerRequest{
 }
