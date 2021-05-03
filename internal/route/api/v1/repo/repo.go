@@ -181,6 +181,22 @@ func CreateUserRepo(c *context.APIContext, owner *db.User, opt api.CreateRepoOpt
 	c.JSON(201, repo.APIFormat(&api.Permission{Admin: true, Push: true, Pull: true}))
 }
 
+func CreateUserRepoWithoutContext(owner *db.User, opt api.CreateRepoOption) (*api.Repository, error){
+	repo, err := db.CreateRepository(owner, owner, db.CreateRepoOptions{
+		Name:        opt.Name,
+		Description: opt.Description,
+		Gitignores:  opt.Gitignores,
+		License:     opt.License,
+		Readme:      opt.Readme,
+		IsPrivate:   opt.Private,
+		AutoInit:    opt.AutoInit,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return repo.APIFormat(&api.Permission{Admin: true, Push: true, Pull: true}), nil
+}
+
 func Create(c *context.APIContext, opt api.CreateRepoOption) {
 	// Shouldn't reach this condition, but just in case.
 	if c.User.IsOrganization() {

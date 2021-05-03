@@ -32,6 +32,7 @@ type HTTPContext struct {
 	OwnerSalt string
 	RepoID    int64
 	RepoName  string
+	BranchName    string
 	AuthUser  *db.User
 }
 
@@ -196,6 +197,7 @@ type serviceHandler struct {
 	ownerSalt string
 	repoID    int64
 	repoName  string
+	branchName    string
 }
 
 func (h *serviceHandler) setHeaderNoCache() {
@@ -421,11 +423,12 @@ func HTTP(c *HTTPContext) {
 			dir:  dir,
 			file: file,
 
-			authUser:  c.AuthUser,
-			ownerName: c.OwnerName,
-			ownerSalt: c.OwnerSalt,
-			repoID:    c.RepoID,
-			repoName:  c.RepoName,
+			authUser:   c.AuthUser,
+			ownerName:  c.OwnerName,
+			ownerSalt:  c.OwnerSalt,
+			repoID:     c.RepoID,
+			repoName:   c.RepoName,
+			branchName: c.BranchName,
 		})
 		return
 	}

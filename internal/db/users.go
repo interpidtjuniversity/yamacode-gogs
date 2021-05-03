@@ -298,7 +298,7 @@ func (db *users) GetByUsername(username string) (*User, error) {
 
 func (db *users) GetAllUser() ([]string, error) {
 	var userNames []string
-	rows, err := db.Table("user").Select("name").Where("id > ?", 0).Rows()
+	rows, err := db.Table("user").Select("name").Where("id > ?", -1).Rows()
 	if err != nil {
 		return nil, err
 	}
