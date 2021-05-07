@@ -36,7 +36,7 @@ func (b *BranchService) CreateBranch(ctx context.Context, request *CreateBranchR
 		return baseResponse, err
 	}
 	protectedBranch := db.ProtectBranch{
-		RepoID: repository.RepoID,
+		RepoID: repository.ID,
 		Name: branch,
 		Protected: protected,
 		RequirePullRequest: needMR,
@@ -148,3 +148,24 @@ func (b *BranchService) RegisterMergeRequest(ctx context.Context, request *Regis
 	return baseResponse, nil
 }
 
+func (b *BranchService) QueryMasterLatestCommit(ctx context.Context, request *MasterLatestCommitQueryRequest) (*MasterLatestCommitQueryResponse, error) {
+	baseResponse := &MasterLatestCommitQueryResponse{}
+
+	ownerName := request.OwnerName
+	repoName := request.RepoName
+	owner, err := db.GetUserByName(ownerName)
+	if err != nil {
+		return baseResponse, db.ErrUserNotExist{Args: errutil.Args{"userName": ownerName}}
+	}
+	_, err = db.GetRepositoryByName(owner.ID, repoName)
+	if err != nil {
+		return baseResponse, db.ErrRepoNotExist{Args: errutil.Args{"userName": ownerName, "repoName": repoName}}
+	}
+	gitRepo, err := git.Open(db.RepoPath(ownerName, repoName))
+	if err != nil {
+		return baseResponse, db.ErrRepoNotExist{Args: errutil.Args{"ownerName": ownerName, "repoName": repoName}}
+	}
+	masterLatestCommit, _ := gitRepo.BranchCommit("master")
+	baseResponse.CommitId = masterLatestCommit.ID.String()
+	return baseResponse, nil
+}
