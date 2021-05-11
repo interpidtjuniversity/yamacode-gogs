@@ -22,3 +22,14 @@ func NewRepoBranch(dir, newBranch string) (bool, error){
 	return true, nil
 
 }
+
+func ListRepoBranch(dir string) []string {
+	var branches []string
+	headsDir := fmt.Sprintf("%s/refs/heads", dir)
+	heads, _ := ioutil.ReadDir(headsDir)
+
+	for _, head := range heads {
+		branches = append(branches, head.Name())
+	}
+	return branches
+}

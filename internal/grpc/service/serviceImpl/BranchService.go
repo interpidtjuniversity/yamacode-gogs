@@ -169,3 +169,21 @@ func (b *BranchService) QueryMasterLatestCommit(ctx context.Context, request *Ma
 	baseResponse.CommitId = masterLatestCommit.ID.String()
 	return baseResponse, nil
 }
+
+func (b *BranchService) QueryAppAllBranch(ctx context.Context, request *QueryAppAllBranchRequest) (*QueryAppAllBranchResponse, error) {
+	baseResponse := &QueryAppAllBranchResponse{}
+	ownerName := request.AppOwner
+	repoName := request.AppName
+	owner, err := db.GetUserByName(ownerName)
+	if err != nil {
+		return baseResponse, db.ErrUserNotExist{Args: errutil.Args{"userName": ownerName}}
+	}
+	_, err = db.GetRepositoryByName(owner.ID, repoName)
+	if err != nil {
+		return baseResponse, db.ErrRepoNotExist{Args: errutil.Args{"userName": ownerName, "repoName": repoName}}
+	}
+	gitRepo, err := git.Open(db.RepoPath(ownerName, repoName))
+
+	baseResponse.AppBranches = gitutil.ListRepoBranch(gitRepo.Path())
+	return baseResponse, nil
+}

@@ -75,6 +75,14 @@ message MasterLatestCommitQueryResponse{
   string commitId = 1;
 }
 
+message QueryAppAllBranchRequest{
+  string appOwner = 1;
+  string appName = 2;
+}
+message QueryAppAllBranchResponse{
+  repeated string appBranches = 1;
+}
+
 service YaMaHubBranchService{
   rpc CreateBranch(CreateBranchRequest) returns (CreateBranchResponse) {}
   rpc DeleteBranch(DeleteBranchRequest) returns (DeleteBranchResponse) {}
@@ -83,4 +91,5 @@ service YaMaHubBranchService{
   rpc RegisterMergeRequest(RegisterMRRequest) returns (RegisterMRResponse){}
   rpc QueryRepoBranchCommit(CommitQueryRequest) returns (CommitQueryResponse) {}
   rpc QueryMasterLatestCommit(MasterLatestCommitQueryRequest) returns (MasterLatestCommitQueryResponse) {}
+  rpc QueryAppAllBranch(QueryAppAllBranchRequest) returns (QueryAppAllBranchResponse) {}
 }
