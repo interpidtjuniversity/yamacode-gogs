@@ -604,6 +604,7 @@ func runWeb(c *cli.Context) error {
 
 			m.Group("/mr/:index", func() {
 				m.Get("/files", context.RepoRef(), iterativeE.ViewMRFiles)
+				m.Get("/pass", context.RepoRef(), iterativeE.PassMR)
 			})
 
 			m.Group("", func() {

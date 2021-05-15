@@ -30,3 +30,20 @@ func InvokePipeLineService() *invoke.StartYaMaPipeLineResponse {
 	}
 	return r
 }
+
+func InvokePassMergerRequestCodeReview(actionId, stageId, stepId int64) (bool, error) {
+	conn := invoke.GetConnection()
+	defer invoke.Return(conn)
+	client := invoke.NewYaMaPipeLineServiceClient(conn)
+	_, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := client.PassMergeRequestCodeReview(context.Background(), &invoke.PassMergeRequestCodeReviewRequest{
+		ActionId: actionId,
+		StageId: stageId,
+		StepId: stepId,
+	})
+	if response == nil {
+		return false, err
+	}
+	return response.Success, err
+}

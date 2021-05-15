@@ -129,6 +129,10 @@ func (b *BranchService) RegisterMergeRequest(ctx context.Context, request *Regis
 		TargetBranch: request.TargetBranch,
 		SourceCommitId: sourceCommit.ID.String(),
 		TargetCommitId: targetCommit.ID.String(),
+		StageId: request.StagedId,
+		ActionId: request.ActionId,
+		StepId: request.StepId,
+		Reviewers: request.Reviewers,
 	}
 	// insert this mr
 	id, err := db.InsertMergeRequest(&mr)

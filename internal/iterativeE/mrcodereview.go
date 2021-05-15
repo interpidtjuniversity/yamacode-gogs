@@ -7,6 +7,7 @@ import (
 	"gogs.io/gogs/internal/context"
 	"gogs.io/gogs/internal/db"
 	"gogs.io/gogs/internal/gitutil"
+	invoker "gogs.io/gogs/internal/grpc/invoke/invokeImpl"
 )
 
 const (
@@ -21,7 +22,8 @@ func GetDiff(sourceCommitId, targetCommitId string, gitRepo *git.Repository) (*g
 
 func ViewMRFiles(c *context.Context) {
 	c.Data["PageIsCodeReview"] = true
-	m, err := db.GetMergeRequestById(c.ParamsInt64(":index"))
+	index := c.ParamsInt64(":index")
+	m, err := db.GetMergeRequestById(index)
 	if err != nil {
 		return
 	}
@@ -41,6 +43,28 @@ func ViewMRFiles(c *context.Context) {
 		return
 	}
 	c.Data["MRDiff"] = diff
+	c.Data["Reviewers"] = m.Reviewers
+	c.Data["MRIndex"] = index
 
 	c.Success(MR_FILES)
+}
+
+func PassMR(c *context.Context) {
+	mrIndex := c.ParamsInt64(":index")
+	user := c.Query("user")
+	m, err := db.GetMergeRequestById(mrIndex)
+	if err != nil {
+		return
+	}
+	var remainViewers []string
+	for _, v := range m.Reviewers {
+		if v != user {
+			remainViewers = append(remainViewers, v)
+		}
+	}
+	db.UpdateMergeRequestViewersById(mrIndex, remainViewers)
+	if len(remainViewers) == 0{
+		// invoke grpc
+		invoker.InvokePassMergerRequestCodeReview(m.ActionId, m.StageId, m.StepId)
+	}
 }

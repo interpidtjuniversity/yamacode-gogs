@@ -14,6 +14,10 @@ type MergeRequest struct {
 	TargetBranch   string   `xorm:"target_branch"`
 	SourceCommitId string   `xorm:"source_commit"`
 	TargetCommitId string   `xorm:"target_commit"`
+	ActionId       int64    `xorm:"action_id"`
+	StageId        int64    `xorm:"stage_id"`
+	StepId         int64    `xorm:"step_id"`
+	Reviewers      []string `xorm:"reviewers"`
 }
 
 func InsertMergeRequest(m *MergeRequest) (int64, error) {
@@ -40,6 +44,12 @@ func GetMergeRequestByRepoIdAndCommitId(repoId int64, sourceCommit, targetCommit
 		return nil, err
 	}
 	return mr, nil
+}
+
+func UpdateMergeRequestViewersById(index int64, remainViewers []string) error {
+	mr := &MergeRequest{Reviewers: remainViewers}
+	_, err := x.Table("merge_request").Cols("reviewers").Where(builder.Eq{"id":index}).Update(mr)
+	return err
 }
 
 

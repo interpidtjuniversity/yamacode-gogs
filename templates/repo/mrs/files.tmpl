@@ -1,8 +1,8 @@
 {{template "base/head" .}}
 
-<div class="repository view issue pull files diff">
+<div class="repository view issue pull files diff" style="float:left; width:85%">
 <div class="ui container">
-<div class="ui bottom attached tab pull segment active">
+<div class="ui bottom attached tab pull segment active" style="margin-left:10%">
 {{range $i, $file := .MRDiff.Files}}
 <div class="diff-file-box diff-box file-content {{TabSizeClass $.Editorconfig $file.Name}}" id="diff-{{.Index}}">
     <div class="ui unstackable attached table segment">
@@ -43,6 +43,9 @@
 </div>
 </div>
 </div>
+<div id="passButtonDiv" style="float:left;width:100px;margin-top:20px">
+<button id="passButton" class="button">通过</button>
+</div>
 
 {{if .Diff.IsIncomplete}}
 <div class="diff-file-box diff-box file-content">
@@ -51,6 +54,21 @@
     </h4>
 </div>
 {{end}}
+
+<style>
+.button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+</style>
 
 <script>
     (function() {
@@ -68,6 +86,28 @@
             }
         });
     }());
+
+    $('#passButton').click(function(){
+      let canClick = false;
+    	for (let i=0; i<{{.Reviewers}}.length; i++) {
+    	  if ({{.Reviewers}}[i] === {{.LoggedUserName}}){
+					canClick = true;
+					break;
+    	  }
+    	}
+    	if (canClick === false) {
+    	} else {
+    	    let passUrl = "pass?user="+{{.LoggedUserName}};
+    	    let xhr = new XMLHttpRequest();
+					xhr.open('get',passUrl);
+					xhr.send();
+					xhr.onreadystatechange = function(){
+              if(xhr.readyState === 4 && xhr.status === 200){
+                  console.log("success");
+              }
+          }
+    	}
+    });
 </script>
 
 {{template "base/footer" .}}
