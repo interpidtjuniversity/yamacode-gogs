@@ -96,7 +96,9 @@ func (b *BranchService) QueryRepoBranchCommit(ctx context.Context, request *Comm
 	} else {
 		listenAddr = fmt.Sprintf("%s:%s", conf.Server.HTTPAddr, conf.Server.HTTPPort)
 	}
-	baseResponse.Url = fmt.Sprintf("%v://%s%s/%s/%s/mr/%d/files", conf.Server.Protocol, listenAddr, conf.Server.Subpath, ownerName, repoName, mr.ID)
+	if mr != nil {
+		baseResponse.Url = fmt.Sprintf("%v://%s%s/%s/%s/mr/%d/files", conf.Server.Protocol, listenAddr, conf.Server.Subpath, ownerName, repoName, mr.ID)
+	}
 	//baseResponse.Url = fmt.Sprintf("%v://%s%s/%s/%s/mr/%d/files", conf.Server.Protocol, "localhost:3002", conf.Server.Subpath, ownerName, repoName, mr.ID)
 
 	return baseResponse, nil
