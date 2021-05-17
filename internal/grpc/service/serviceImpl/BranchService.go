@@ -57,7 +57,25 @@ func (b *BranchService) DeleteBranch(ctx context.Context, request *DeleteBranchR
 }
 
 func (b *BranchService) Merge2Branch(ctx context.Context, request *Merge2BranchRequest) (*Merge2BranchResponse, error) {
-	return nil,nil
+	baseResponse := &Merge2BranchResponse{}
+	ownerName := request.UserName
+	repoName := request.Repository
+	owner, err := db.GetUserByName(ownerName)
+	if err != nil {
+		return baseResponse, db.ErrUserNotExist{Args: errutil.Args{"userName": ownerName}}
+	}
+	_, err = db.GetRepositoryByName(owner.ID, repoName)
+	if err != nil {
+		return baseResponse, db.ErrRepoNotExist{Args: errutil.Args{"userName": ownerName, "repoName": repoName}}
+	}
+	gitRepo, err := git.Open(db.RepoPath(ownerName, repoName))
+	if err != nil {
+		return baseResponse, db.ErrRepoNotExist{Args: errutil.Args{"ownerName": ownerName, "repoName": repoName}}
+	}
+
+	success, err :=gitutil.MergeSourceToTarget(gitRepo.Path(), repoName, request.SourceBranch, request.TargetBranch)
+	baseResponse.Success = success
+	return baseResponse,err
 }
 
 func (b *BranchService) Query2BranchConflict(ctx context.Context, request *ConflictDetectRequest) (*ConflictDetectResponse, error) {

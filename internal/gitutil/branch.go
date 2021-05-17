@@ -1,10 +1,17 @@
 package gitutil
 
 import (
+	"context"
 	"fmt"
 	"github.com/unknwon/com"
+	"gogs.io/gogs/internal/strutil"
 	"io/ioutil"
+	"os"
+	"os/exec"
 )
+
+const GITPUSH_DIR = "/var/run/yama/yamaHub/repo/%s"
+const GITPUSH_LOG_DIR = "/var/run/yama/yamaHub/repo/%s/log.log"
 
 // cd /refs/heads and copy master as newBranch
 func NewRepoBranch(dir, newBranch string) (bool, error){
@@ -32,4 +39,27 @@ func ListRepoBranch(dir string) []string {
 		branches = append(branches, head.Name())
 	}
 	return branches
+}
+
+// git clone repository
+// git checkout target
+// git merge source
+// git push repoPath target
+func MergeSourceToTarget(dir, repoName, source, target string) (bool, error) {
+	ctx := context.Background()
+	rdmDir, _ := strutil.RandomChars(10)
+	yamaHubDir, _ := os.Getwd()
+	mergeSH := fmt.Sprintf("%s/internal/gitutil/merge.sh", yamaHubDir)
+
+	mergeCmd := exec.CommandContext(ctx, mergeSH, dir, target, source, repoName)
+	mergeCmd.Dir = fmt.Sprintf(GITPUSH_DIR, rdmDir)
+	os.MkdirAll(mergeCmd.Dir, os.ModePerm)
+	log, _ := os.OpenFile(fmt.Sprintf(GITPUSH_LOG_DIR, rdmDir), os.O_CREATE|os.O_WRONLY, 0777)
+	mergeCmd.Stdout = log
+	mergeCmd.Stderr = log
+	err := mergeCmd.Run()
+	if err != nil {
+		return false, err
+	}
+	return true, err
 }

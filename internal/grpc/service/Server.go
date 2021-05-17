@@ -3,6 +3,7 @@ package service
 import (
 	"gogs.io/gogs/internal/grpc/service/serviceImpl"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
 )
@@ -15,6 +16,7 @@ func Start() {
 
 	//建立 gPRC 服务器，并注册服务
 	s := grpc.NewServer()
+	reflection.Register(s)
 	// start all grpc service
 	serviceImpl.RegisterYaMaHubBranchServiceServer(s, &serviceImpl.BranchService{})
 	serviceImpl.RegisterYaMaHubApplicationServiceServer(s, &serviceImpl.ApplicationService{})
