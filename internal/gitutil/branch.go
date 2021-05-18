@@ -45,13 +45,13 @@ func ListRepoBranch(dir string) []string {
 // git checkout target
 // git merge source
 // git push repoPath target
-func MergeSourceToTarget(dir, repoName, source, target string) (bool, error) {
+func MergeSourceToTarget(dir, repoName, source, target, mergeInfo string) (bool, error) {
 	ctx := context.Background()
 	rdmDir, _ := strutil.RandomChars(10)
 	yamaHubDir, _ := os.Getwd()
 	mergeSH := fmt.Sprintf("%s/internal/gitutil/merge.sh", yamaHubDir)
 
-	mergeCmd := exec.CommandContext(ctx, mergeSH, dir, target, source, repoName)
+	mergeCmd := exec.CommandContext(ctx, mergeSH, dir, target, source, repoName, mergeInfo)
 	mergeCmd.Dir = fmt.Sprintf(GITPUSH_DIR, rdmDir)
 	os.MkdirAll(mergeCmd.Dir, os.ModePerm)
 	log, _ := os.OpenFile(fmt.Sprintf(GITPUSH_LOG_DIR, rdmDir), os.O_CREATE|os.O_WRONLY, 0777)

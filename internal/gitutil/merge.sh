@@ -10,5 +10,9 @@ git clone $1
 cd $4
 git checkout $3
 git checkout $2
-git merge $3
+if [ "" = "$4" ] ;then
+  git merge $3
+else
+  git merge $3 -m $4
+fi
 git push $1 $2

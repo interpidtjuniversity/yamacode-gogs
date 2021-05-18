@@ -73,7 +73,7 @@ func (b *BranchService) Merge2Branch(ctx context.Context, request *Merge2BranchR
 		return baseResponse, db.ErrRepoNotExist{Args: errutil.Args{"ownerName": ownerName, "repoName": repoName}}
 	}
 
-	success, err :=gitutil.MergeSourceToTarget(gitRepo.Path(), repoName, request.SourceBranch, request.TargetBranch)
+	success, err :=gitutil.MergeSourceToTarget(gitRepo.Path(), repoName, request.SourceBranch, request.TargetBranch, request.MergeInfo)
 	baseResponse.Success = success
 	return baseResponse,err
 }
