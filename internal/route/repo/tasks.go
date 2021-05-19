@@ -5,6 +5,7 @@
 package repo
 
 import (
+	invoker "gogs.io/gogs/internal/grpc/invoke/invokeImpl"
 	"net/http"
 
 	"gopkg.in/macaron.v1"
@@ -70,5 +71,17 @@ func TriggerTask(c *macaron.Context) {
 
 	go db.HookQueue.Add(repo.ID)
 	go db.AddTestPullRequestTask(pusher, repo.ID, branch, true)
+	go ReStartPipelineIfNecessary(username, reponame, branch, pusher.Name)
 	c.Status(http.StatusAccepted)
+}
+
+// pusherId push to userName/repoName's branch, if need to tiger a new pipeline
+func ReStartPipelineIfNecessary(userName, repoName, branch, pusherName string) {
+	mrps, _ := db.GetMergeRequestPipeline(userName, repoName, branch, pusherName)
+	for _, mrp := range mrps {
+		if !mrp.Finish && mrp.ActionId != 0 {
+			invoker.InvokeRestartYaMaPipeLineService(mrp.PipelineId, mrp.IterationId, mrp.ActionId, mrp.PusherName, mrp.SourceBranch,
+				mrp.TargetBranch, mrp.MRCodeReviewers, mrp.Env, mrp.MRInfo, mrp.UserName, mrp.RepoName)
+		}
+	}
 }

@@ -154,8 +154,24 @@ func (b *BranchService) RegisterMergeRequest(ctx context.Context, request *Regis
 		StepId: request.StepId,
 		Reviewers: request.Reviewers,
 	}
+	mrp := db.MergeRequestPipeline{
+		UserName: request.OwnerName,
+		RepoName: request.RepoName,
+		PusherName: request.ActorName,
+		ActionId: request.ActionId,
+		SourceBranch: request.SourceBranch,
+		TargetBranch: request.TargetBranch,
+		Finish: false,
+		PipelineId: request.PipelineId,
+		IterationId: request.IterationId,
+		Env: request.Env,
+		ActionInfo: request.ActionInfo,
+		MRCodeReviewers: request.Reviewers,
+		MRInfo: request.ActionInfo,
+	}
 	// insert this mr
 	id, err := db.InsertMergeRequest(&mr)
+	_, err = db.InsertMergeRequestPipeline(&mrp)
 	if err != nil {
 		return baseResponse, err
 	}
@@ -209,5 +225,16 @@ func (b *BranchService) QueryAppAllBranch(ctx context.Context, request *QueryApp
 	gitRepo, err := git.Open(db.RepoPath(ownerName, repoName))
 
 	baseResponse.AppBranches = gitutil.ListRepoBranch(gitRepo.Path())
+	return baseResponse, nil
+}
+
+func (b *BranchService) FinishMergeRequestPipeline(ctx context.Context, request *FinishMergeRequestPipelineRequest) (*FinishMergeRequestPipelineResponse, error) {
+	baseResponse := &FinishMergeRequestPipelineResponse{}
+	actionIds := []int64{request.ActionId}
+	err := db.BranchUpdateMergeRequestPipelineFinish(actionIds)
+	if err!=nil {
+		return baseResponse, err
+	}
+	baseResponse.Success = true
 	return baseResponse, nil
 }

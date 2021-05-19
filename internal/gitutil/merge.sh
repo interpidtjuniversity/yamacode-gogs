@@ -13,6 +13,6 @@ git checkout $2
 if [ "" = "$4" ] ;then
   git merge $3
 else
-  git merge $3 -m $4
+  git merge $3 -m "$4"
 fi
 git push $1 $2

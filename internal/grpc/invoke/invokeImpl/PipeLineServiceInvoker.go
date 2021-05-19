@@ -47,3 +47,29 @@ func InvokePassMergerRequestCodeReview(actionId, stageId, stepId int64) (bool, e
 	}
 	return response.Success, err
 }
+
+func InvokeRestartYaMaPipeLineService(pipelineId, iterationId, actionId int64, actorName, sourceBranch, targetBranch string,
+	mrCodeReviewers []string, env, mrInfo, appOwner, appName string) (bool, error){
+	conn := invoke.GetConnection()
+	defer invoke.Return(conn)
+	client := invoke.NewYaMaPipeLineServiceClient(conn)
+	_, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := client.RestartYaMaPipeLine(context.Background(), &invoke.RestartYaMaPipeLineRequest{
+		PipelineId: pipelineId,
+		IterationId: iterationId,
+		ActorName: actorName,
+		SourceBranch: sourceBranch,
+		TargetBranch: targetBranch,
+		MrCodeReviews: mrCodeReviewers,
+		Env: env,
+		MrInfo: mrInfo,
+		AppOwner: appOwner,
+		AppName: appName,
+		ActionId: actionId,
+	})
+	if response == nil {
+		return false, err
+	}
+	return response.Success, err
+}
