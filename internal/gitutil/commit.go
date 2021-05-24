@@ -28,8 +28,12 @@ func (br *bufferReader) readLine() {
 	}
 }
 
-func GetRepoLatestMergeCommit(dir string) (string, string, string, []byte, error) {
-	stdout, stderr, err := com.ExecCmdDirBytes(dir, "git","log")
+func GetRepoLatestMergeCommit(dir, branch string) (string, string, string, []byte, error) {
+	stdout, stderr, err := com.ExecCmdDirBytes(dir, "git", "checkout", branch)
+	if err != nil {
+		return "", "", "", stderr, err
+	}
+	stdout, stderr, err = com.ExecCmdDirBytes(dir, "git","log")
 	if err != nil {
 		return "", "", "", stderr, err
 	}

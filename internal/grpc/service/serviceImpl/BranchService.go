@@ -103,7 +103,7 @@ func (b *BranchService) QueryRepoBranchCommit(ctx context.Context, request *Comm
 	          parent             parent
 	     sourcecCommitId    targetCommitId
 	*/
-	latestCommitId,sourcecCommitId,targetCommitId,_,_ := gitutil.GetRepoLatestMergeCommit(gitRepo.Path())
+	latestCommitId,sourcecCommitId,targetCommitId,_,_ := gitutil.GetRepoLatestMergeCommit(gitRepo.Path(), request.BranchName)
 	mr, _ := db.GetMergeRequestByRepoIdAndCommitId(repository.ID, sourcecCommitId, targetCommitId)
 
 	baseResponse.CommitId = latestCommitId
