@@ -99,12 +99,13 @@ func (b *BranchService) QueryRepoBranchCommit(ctx context.Context, request *Comm
 		return baseResponse, db.ErrRepoNotExist{Args: errutil.Args{"ownerName": ownerName, "repoName": repoName}}
 	}
 	/**
-	               latestCommitId
-	          parent             parent
-	     sourcecCommitId    targetCommitId
+	               latestCommitId                               latestCommitId
+	          parent             parent                         sourceCommitId
+	     sourceCommitId     targetCommitId                      targetCommitId
 	*/
-	latestCommitId,sourcecCommitId,targetCommitId,_,_ := gitutil.GetRepoLatestMergeCommit(gitRepo.Path(), request.BranchName)
-	mr, _ := db.GetMergeRequestByRepoIdAndCommitId(repository.ID, sourcecCommitId, targetCommitId)
+	latestCommitId,_,_ := gitutil.GetRepoLatestMergeCommit(gitRepo.Path(), request.BranchName)
+	// mr, _ := db.GetMergeRequestByRepoIdAndCommitId(repository.ID, sourceCommitId, targetCommitId)
+	mr, _ := db.GetLatestMergeRequestByTargetBranch(repository.ID, request.BranchName)
 
 	baseResponse.CommitId = latestCommitId
 

@@ -46,6 +46,12 @@ func GetMergeRequestByRepoIdAndCommitId(repoId int64, sourceCommit, targetCommit
 	return mr, nil
 }
 
+func GetLatestMergeRequestByTargetBranch(repoId int64, branchName string) (*MergeRequest, error) {
+	mr := &MergeRequest{}
+	_, err := x.Where(builder.Eq{"repo_id": repoId, "target_branch": branchName}).Desc("id").Limit(1).Get(mr)
+	return mr, err
+}
+
 func UpdateMergeRequestViewersById(index int64, remainViewers []string) error {
 	mr := &MergeRequest{Reviewers: remainViewers}
 	_, err := x.Table("merge_request").Cols("reviewers").Where(builder.Eq{"id":index}).Update(mr)

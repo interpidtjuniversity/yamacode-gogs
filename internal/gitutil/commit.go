@@ -11,11 +11,20 @@ type bufferReader struct {
 	index       int
 	currentLine []byte
 	prevLine    []byte
+	firstLine   []byte
 	over        bool
+	findFirst   bool
 }
 func (br *bufferReader) readLine() {
 	br.prevLine = make([]byte, len(br.currentLine))
 	copy(br.prevLine, br.currentLine)
+	if !br.findFirst {
+		br.firstLine = make([]byte, len(br.currentLine))
+		copy(br.firstLine, br.currentLine)
+		if len(br.firstLine) > 0 {
+			br.findFirst = true
+		}
+	}
 	br.currentLine = make([]byte, 0)
 	for i:=br.index; br.index<len(br.buffer) && br.buffer[i]!='\n'; i++ {
 		br.index++
@@ -28,25 +37,26 @@ func (br *bufferReader) readLine() {
 	}
 }
 
-func GetRepoLatestMergeCommit(dir, branch string) (string, string, string, []byte, error) {
+func GetRepoLatestMergeCommit(dir, branch string) (string, []byte, error) {
 	stdout, stderr, err := com.ExecCmdDirBytes(dir, "git","log", branch)
 	if err != nil {
-		return "", "", "", stderr, err
+		return "", stderr, err
 	}
-	commitInfo, mergeInfo := getLatestMergeCommitInfo(stdout)
-	commitId := parseCommit(commitInfo)
-	targetId, sourceId := parseMerge(mergeInfo)
-	return commitId, sourceId, targetId, nil, nil
+	LatestCommitInfo, _, _ := getLatestMergeCommitInfo(stdout)
+	LatestCommitId := parseCommit(LatestCommitInfo)
+	//targetId, sourceId := parseMerge(mergeInfo)
+	// sourceId, targetId := parseMerge(mergeInfo)
+	return LatestCommitId , nil, nil
 }
 
-func getLatestMergeCommitInfo(buffer []byte) ([]byte, []byte){
+func getLatestMergeCommitInfo(buffer []byte) ([]byte, []byte, []byte){
 	reader := bufferReader{buffer: buffer}
 
 	for !reader.over && !bytes.HasPrefix(reader.currentLine, []byte("Merge")) {
 		reader.readLine()
 	}
 
-	return reader.prevLine, reader.currentLine
+	return reader.firstLine, reader.prevLine, reader.currentLine
 }
 
 func parseCommit(commit []byte) string{
